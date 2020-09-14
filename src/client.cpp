@@ -42,6 +42,8 @@ void Client::initialize()
 
 void Client::client_listen()
 {
+	bool isQUIT = false;
+
 	for (;;)
 	{
 		std::wstring response;
@@ -57,11 +59,24 @@ void Client::client_listen()
 		// Выводим ответ сервера
 		Functionality::notify(response, 1);
 
+		if (isQUIT)
+		{
+			this->client_close();
+			return;
+		}
+
 		std::wstring command;
 
 		// Просим ввести команду 
-		std::wcout << configuration::status::INPUT;
-		std::wcin >> command;
+		std::wcout << configuration::status::INPUT << std::flush;
+		
+		do
+		{
+			std::getline(std::wcin, command);
+		} while (command.empty());
+
+		if (command.find(L"QUIT") != std::string::npos)
+			isQUIT = true;
 
 		// Отправляем команду серверу
 		this->send_command(command);
